@@ -1,0 +1,6 @@
+[package]
+name = "iron_mq_rust"
+version = "0.1.0"
+authors = ["Maksym Shekhovets <maximsh@interlink-ua.com>"]
+
+[dependencies]
