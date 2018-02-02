@@ -28,10 +28,10 @@ test:stable:
     - cargo test --all --verbose
 
 # Run `cargo test` for the project with latest nightly Rust
-test:nightly:
-  image: "rust:nightly"
-  tags:
-    - docker
-  script:
-    - rustc --version && cargo --version      # Print version info for debugging
-    - cargo test --verbose --jobs 1 --release
+#test:nightly:
+#  image: "rust:nightly"                      # TODO: find suitable nightly image
+#  tags:
+#    - docker
+#  script:
+#    - rustc --version && cargo --version      # Print version info for debugging
+#    - cargo test --verbose --jobs 1 --release
