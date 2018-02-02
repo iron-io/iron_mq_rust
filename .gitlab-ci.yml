@@ -2,6 +2,8 @@
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/rust/tags/
 image: "rust:latest"
+tags:
+    - docker
 
 # Optional: Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
@@ -20,13 +22,17 @@ image: "rust:latest"
 # Run `cargo test` for the project with stable Rust
 test:stable:
   image: "rust:latest"
+  tags:
+    - docker
   script:
-  - rustc --version && cargo --version      # Print version info for debugging
-  - cargo test --all --verbose
+    - rustc --version && cargo --version      # Print version info for debugging
+    - cargo test --all --verbose
 
 # Run `cargo test` for the project with latest nightly Rust
 test:nightly:
   image: "rust:nightly"
+  tags:
+    - docker
   script:
-  - rustc --version && cargo --version      # Print version info for debugging
-  - cargo test --verbose --jobs 1 --release
+    - rustc --version && cargo --version      # Print version info for debugging
+    - cargo test --verbose --jobs 1 --release
