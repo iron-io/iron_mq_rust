@@ -10,22 +10,39 @@ use hyper::{Method, Request};
 use hyper::header::{ContentType, Authorization};
 use http_client::*;
 
-pub struct IronMQ {
+pub struct Client {
     pub base_path: String,
     http_client: HttpClient,
     token: String
 }
 
-impl IronMQ {
-    pub fn new(host: &str, project_id: &str, token: &str) -> IronMQ {
+impl Client {
+    pub fn new(host: &str, project_id: &str, token: &str) -> Client {
         let base_path = format!("https://{}/3/projects/{}/", host,project_id);
         let http_client = HttpClient::new();
 
-        IronMQ {
+        Client {
             base_path: base_path,
             http_client: http_client,
             token: token.to_string()
         }
     }
+
+    pub fn get_queue_info(&mut self, queue_id: &str) -> String {
+        let path = format!("{}queues/{}",self.base_path,queue_id);
+        let mut req = Request::new(Method::Get, path.parse().unwrap());
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}",self.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let get = self.http_client.client.request(req).and_then(|res| {
+            res.body().concat2()
+        });
+        let res = self.http_client.core.run(get).unwrap();
+
+        String::from_utf8(res.to_vec()).unwrap()
+    }
+
 }
 
