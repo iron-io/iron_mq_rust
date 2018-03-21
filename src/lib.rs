@@ -4,11 +4,15 @@ extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;
 extern crate tokio_core;
+#[macro_use]
+extern crate dotenv_codegen;
 
 use futures::{Future, Stream};
 use hyper::{Method, Request};
 use hyper::header::{ContentType, Authorization};
 use http_client::*;
+
+use std::env;
 
 pub struct Client {
     pub base_path: String,
@@ -17,6 +21,7 @@ pub struct Client {
 }
 
 impl Client {
+
     pub fn new(host: &str, project_id: &str, token: &str) -> Client {
         let base_path = format!("https://{}/3/projects/{}/", host,project_id);
         let http_client = HttpClient::new();
@@ -26,6 +31,14 @@ impl Client {
             http_client: http_client,
             token: token.to_string()
         }
+    }
+
+    pub fn from_env() -> Client {
+        let host = dotenv!("IRON_HOST");
+        let project_id = dotenv!("IRON_PROJECT_ID");
+        let token = dotenv!("IRON_TOKEN");
+
+        Client::new(host, project_id, token)
     }
 
     pub fn get_queue_info(&mut self, queue_id: &str) -> String {

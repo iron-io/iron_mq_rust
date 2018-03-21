@@ -6,23 +6,15 @@ use iron_mq_rust::*;
 mod tests {
     use super::*;
 
-    static HOST: &str = "host";
-    static PROJECT_ID: &str = "project_id";
-    static TOKEN: &str = "auth token";
-    static QUEUE_NAME: &str = "queue name";
-
     #[test] 
     fn init_client() {
-        let mq = Client::new(HOST, PROJECT_ID, TOKEN);
-        let base_path = format!("https://{}/3/projects/{}/", HOST, PROJECT_ID);
-
-        assert!(mq.base_path == base_path);
+        let mq = Client::from_env();
     }
 
     #[test] 
     fn get_queue_info() {
-        let mut mq = Client::new(HOST, PROJECT_ID, TOKEN);
-        let queue_info = mq.get_queue_info(QUEUE_NAME);
+        let mut mq = Client::from_env();
+        let queue_info = mq.get_queue_info("test-pull");
 
         assert!(queue_info.len() > 0);
         assert!(!queue_info.contains("Queue not found"));
