@@ -1,8 +1,8 @@
 extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;
-extern crate tokio_core;
 extern crate num_cpus;
+extern crate tokio_core;
 
 use hyper::Client;
 use hyper::client::HttpConnector;
@@ -15,27 +15,29 @@ pub struct HttpClient {
 }
 
 impl HttpClient {
-     pub fn new() -> HttpClient {
+    pub fn new() -> HttpClient {
         let num_cpus = num_cpus::get();
         let core = tokio_core::reactor::Core::new().expect("Tokio core initialization error");
         let handle = core.handle();
+        let connector = HttpsConnector::new(num_cpus, &handle).expect("Https connector initialization error");
+
         let client = Client::configure()
-            .connector(HttpsConnector::new(num_cpus, &handle).expect("Https connector initialization error"))
+            .connector(connector)
             .build(&handle);
-    
+
         HttpClient {
             core: core,
             handle: handle,
             client: client,
         }
-     }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test] 
+    #[test]
     fn https_request() {
         let mut http_client = HttpClient::new();
         let req = http_client.client.get("https://hyper.rs".parse().unwrap());

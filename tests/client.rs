@@ -6,12 +6,12 @@ use iron_mq_rust::*;
 mod tests {
     use super::*;
 
-    #[test] 
+    #[test]
     fn init_client() {
         let mq = Client::from_env();
     }
 
-    #[test] 
+    #[test]
     fn get_queue_info() {
         let mut mq = Client::from_env();
         let queue_info = mq.get_queue_info("test-pull");
