@@ -24,9 +24,9 @@ impl Client {
         let http_client = HttpClient::new();
 
         Client {
-            base_path: base_path,
-            http_client: http_client,
-            token: token.to_string(),
+            base_path,
+            http_client,
+            token,
         }
     }
 

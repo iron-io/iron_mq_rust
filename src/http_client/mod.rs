@@ -26,9 +26,9 @@ impl HttpClient {
             .build(&handle);
 
         HttpClient {
-            core: core,
-            handle: handle,
-            client: client,
+            core,
+            handle,
+            client
         }
     }
 }
@@ -39,8 +39,9 @@ mod tests {
 
     #[test]
     fn https_request() {
+        let uri = "https://hyper.rs".parse().unwrap();
         let mut http_client = HttpClient::new();
-        let req = http_client.client.get("https://hyper.rs".parse().unwrap());
+        let req = http_client.client.get(uri);
         let res = http_client.core.run(req).unwrap();
         assert!(res.status().is_success());
     }
