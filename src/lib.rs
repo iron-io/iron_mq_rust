@@ -1,7 +1,5 @@
 mod http_client;
 
-#[macro_use]
-extern crate dotenv_codegen;
 extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;
@@ -21,7 +19,7 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(host: &str, project_id: &str, token: &str) -> Client {
+    pub fn new(host: String, project_id: String, token: String) -> Client {
         let base_path = format!("https://{}/3/projects/{}/", host, project_id);
         let http_client = HttpClient::new();
 
@@ -33,9 +31,9 @@ impl Client {
     }
 
     pub fn from_env() -> Client {
-        let host = dotenv!("IRON_HOST");
-        let project_id = dotenv!("IRON_PROJECT_ID");
-        let token = dotenv!("IRON_TOKEN");
+        let host = get_from_env("IRON_HOST");
+        let project_id = get_from_env("IRON_PROJECT_ID");
+        let token = get_from_env("IRON_TOKEN");
 
         Client::new(host, project_id, token)
     }
@@ -55,4 +53,15 @@ impl Client {
 
         String::from_utf8(res.to_vec()).unwrap()
     }
+}
+
+fn get_from_env(variable: &str) -> String {
+    let error_message = format!("Missed {} environment variable!", variable);
+
+    let var = env::var(variable)
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .expect(&error_message);
+
+    var
 }
