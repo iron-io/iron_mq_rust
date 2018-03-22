@@ -14,7 +14,9 @@ mod tests {
     #[test]
     fn get_queue_info() {
         let mut mq = Client::from_env();
-        let queue_info = mq.get_queue_info("test-pull");
+        let queue_name = String::from("test-pull");
+        let mut q = mq.queue(queue_name);
+        let queue_info = q.info();
 
         assert!(queue_info.len() > 0);
         assert!(!queue_info.contains("Queue not found"));

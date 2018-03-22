@@ -1,4 +1,5 @@
 mod http_client;
+mod queue;
 
 extern crate futures;
 extern crate hyper;
@@ -9,6 +10,7 @@ use futures::{Future, Stream};
 use hyper::{Method, Request};
 use hyper::header::{Authorization, ContentType};
 use http_client::*;
+use queue::*;
 
 use std::env;
 
@@ -37,21 +39,12 @@ impl Client {
 
         Client::new(host, project_id, token)
     }
-
-    pub fn get_queue_info(&mut self, queue_id: &str) -> String {
-        let path = format!("{}queues/{}", self.base_path, queue_id);
-        let mut req = Request::new(Method::Get, path.parse().unwrap());
-        req.headers_mut().set(ContentType::json());
-        let authorization_header = format!("OAuth {}", self.token);
-        req.headers_mut().set(Authorization(authorization_header));
-
-        let get = self.http_client
-            .client
-            .request(req)
-            .and_then(|res| res.body().concat2());
-        let res = self.http_client.core.run(get).unwrap();
-
-        String::from_utf8(res.to_vec()).unwrap()
+    
+    pub fn queue(&mut self,name: String) -> Queue {
+        Queue {
+            client: self,
+            name
+        }
     }
 }
 
