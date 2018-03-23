@@ -63,8 +63,7 @@ impl<'a> Queue<'a> {
             .run(post)
             .unwrap();
 
-        let response_body = String::from_utf8(res.to_vec()).unwrap();
-        let response: Value = serde_json::from_str(&response_body).unwrap();
+        let response: Value = serde_json::from_slice(&res).unwrap();
         response["ids"][0].to_string()
     }
 }
