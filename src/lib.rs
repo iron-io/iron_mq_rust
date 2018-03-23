@@ -7,6 +7,9 @@ extern crate hyper_tls;
 extern crate tokio_core;
 #[macro_use]
 extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 use futures::{Future, Stream};
 use hyper::{Method, Request};

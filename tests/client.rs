@@ -24,12 +24,10 @@ mod tests {
     fn get_queue_info() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-pull");
-        let mut q = mq.queue(queue_name);
+        let mut q = mq.queue(queue_name.clone());
         let queue_info = q.info();
 
-        assert!(queue_info.len() > 0);
-        assert!(!queue_info.contains("Queue not found"));
-        assert!(!queue_info.contains("Invalid project/token combination"));
+        assert_eq!(queue_info.name, queue_name.to_string());
     }
 
     #[test]
