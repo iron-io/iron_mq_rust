@@ -81,6 +81,6 @@ pub struct QueueInfo {
     pub message_expiration: u32,
     #[serde(rename = "type")] 
     pub queue_type: String,
-    pub size: usize,
-    pub total_messages: usize,
+    pub size: Option<usize>,
+    pub total_messages: Option<usize>,
 }

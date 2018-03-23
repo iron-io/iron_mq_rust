@@ -1,5 +1,7 @@
 extern crate iron_mq_rust;
 
+use std::collections::HashMap;
+
 use iron_mq_rust::*;
 
 #[cfg(test)]
@@ -9,6 +11,13 @@ mod tests {
     #[test]
     fn init_client() {
         let mq = Client::from_env();
+    }
+
+    #[test]
+    fn create_queue() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-pull");
+        let queue_info = mq.create_queue(&queue_name);
     }
 
     #[test] 
@@ -24,20 +33,25 @@ mod tests {
     fn get_queue_info() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-pull");
-        let mut q = mq.queue(queue_name.clone());
+        let info = mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name);
         let queue_info = q.info();
 
-        assert_eq!(queue_info.name, queue_name.to_string());
+        assert_eq!(info.name, queue_info.name);
     }
 
     #[test]
     fn push_message() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-pull");
+        mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
+        let queue_info_before_push = q.info();
         let id = q.push_message("test message");
+        let queue_info_after_push = q.info();
 
         assert!(id.len() > 0);
+        assert_eq!(queue_info_before_push.size.unwrap() + 1, queue_info_after_push.size.unwrap());
     }
 
 }
