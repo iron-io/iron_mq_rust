@@ -1,4 +1,5 @@
 pub mod queue_info;
+pub mod message;
 
 use serde_json::{Value};
 
