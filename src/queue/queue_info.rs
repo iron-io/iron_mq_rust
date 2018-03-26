@@ -30,43 +30,49 @@ impl QueueInfo {
         }
     }
 
-    pub fn name(&mut self, name: String) -> &QueueInfo {
+    pub fn name(&mut self, name: String) -> &mut QueueInfo {
         self.name = name;
 
         self
     }
 
-    pub fn project_id(&mut self, project_id: String) -> &QueueInfo {
+    pub fn project_id(&mut self, project_id: String) -> &mut QueueInfo {
         self.project_id = Some(project_id);
 
         self
     }
 
-    pub fn message_timeout(&mut self, message_timeout: u32) -> &QueueInfo {
+    pub fn message_timeout(&mut self, message_timeout: u32) -> &mut QueueInfo {
         self.message_timeout = Some(message_timeout);
 
         self
     }
 
-    pub fn size(&mut self, size: usize) -> &QueueInfo {
+    pub fn message_expiration(&mut self, message_expiration: u32) -> &mut QueueInfo {
+        self.message_expiration = Some(message_expiration);
+
+        self
+    }
+
+    pub fn size(&mut self, size: usize) -> &mut QueueInfo {
         self.size = Some(size);
 
         self
     }
 
-    pub fn total_messages(&mut self, total_messages: usize) -> &QueueInfo {
+    pub fn total_messages(&mut self, total_messages: usize) -> &mut QueueInfo {
         self.total_messages = Some(total_messages);
 
         self
     }
 
-    pub fn push(&mut self, push: PushInfo) -> &QueueInfo {
+    pub fn push(&mut self, push: PushInfo) -> &mut QueueInfo {
         self.push = Some(push);
 
         self
     }
 
-    pub fn alerts(&mut self, alerts: Alert) -> &QueueInfo {
+    pub fn alerts(&mut self, alerts: Alert) -> &mut QueueInfo {
         self.alerts = Some(alerts);
 
         self
