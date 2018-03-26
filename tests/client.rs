@@ -36,6 +36,25 @@ mod tests {
         assert_eq!(queue_info.message_expiration.unwrap(), message_expiration);
     }
 
+    #[test]
+    fn update_queue() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("update-test");
+        let queue_info = mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_info.name.clone());
+        let mut config = QueueInfo::new(queue_info.name);
+        let message_timeout: u32 = 180;
+        let message_expiration: u32 = 600;
+        config
+            .message_timeout(message_timeout.clone())
+            .message_expiration(message_expiration.clone());
+
+        let updated_info: QueueInfo = q.update(&config).unwrap();
+        
+        assert_eq!(updated_info.message_timeout.unwrap(), message_timeout);
+        assert_eq!(updated_info.message_expiration.unwrap(), message_expiration);
+    }
+
     #[test] 
     fn get_queue() {
         let mut mq = Client::from_env();
