@@ -23,12 +23,13 @@ impl<'a> Queue<'a> {
             .client
             .request(req)
             .and_then(|res| res.body().concat2());
-        
+
         let res = self.client
-            .http_client.core
+            .http_client
+            .core
             .run(get)
             .unwrap();
-        
+
         let v: Value = serde_json::from_slice(&res).unwrap();
         let queue_info: QueueInfo = serde_json::from_value(v["queue"].clone()).unwrap();
 
@@ -60,7 +61,7 @@ impl<'a> Queue<'a> {
             .client
             .request(req)
             .and_then(|res| res.body().concat2());
-        
+
         let res = self.client
             .http_client
             .core
@@ -70,5 +71,25 @@ impl<'a> Queue<'a> {
         let response: Value = serde_json::from_slice(&res).unwrap();
         response["ids"][0].to_string()
     }
-}
 
+    pub fn delete(&mut self) {
+        let path = format!("{}queues/{}", self.client.base_path, self.name);
+        let mut req = Request::new(Method::Delete, path.parse().unwrap());
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+    }
+}
