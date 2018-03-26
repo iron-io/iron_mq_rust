@@ -70,4 +70,15 @@ mod tests {
         assert_eq!(queue_info_before_push.size.unwrap() + 1, queue_info_after_push.size.unwrap());
     }
 
+    #[test]
+    #[should_panic]
+    fn delete_queue() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-delete");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name);
+        q.delete();
+        q.info();
+    }
+
 }
