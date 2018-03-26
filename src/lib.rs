@@ -1,5 +1,5 @@
-mod http_client;
-mod queue;
+pub mod http_client;
+pub mod queue;
 
 extern crate futures;
 extern crate hyper;
@@ -20,6 +20,7 @@ use std::env;
 use std::collections::HashMap;
 
 use queue::*;
+use queue::queue_info::*;
 
 pub struct Client {
     pub base_path: String,
@@ -55,11 +56,11 @@ impl Client {
     }
 
     pub fn create_queue(&mut self, name: &String) -> QueueInfo {
-        let config = HashMap::new();
+        let config = QueueInfo::new(name.to_string());
         Client::create_queue_with_config(self, name, &config)
     }
 
-    pub fn create_queue_with_config(&mut self, name: &String, config: &HashMap<String, String>) -> QueueInfo {
+    pub fn create_queue_with_config(&mut self, name: &String, config: &QueueInfo) -> QueueInfo {
         let path = format!("{}queues/{}", self.base_path, name).parse().expect("Incorrect path");
         let mut req = Request::new(Method::Put, path);
         req.headers_mut().set(ContentType::json());
@@ -83,8 +84,7 @@ impl Client {
             .run(put)
             .unwrap();
 
-        let response_body = String::from_utf8(res.to_vec()).unwrap();
-        let v: Value = serde_json::from_str(&response_body).unwrap();
+        let v: Value = serde_json::from_slice(&res).unwrap();
         let queue_info: QueueInfo = serde_json::from_value(v["queue"].clone()).unwrap();
 
         queue_info

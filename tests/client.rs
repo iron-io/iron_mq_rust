@@ -1,8 +1,7 @@
 extern crate iron_mq_rust;
 
-use std::collections::HashMap;
-
 use iron_mq_rust::*;
+use iron_mq_rust::queue::queue_info::QueueInfo;
 
 #[cfg(test)]
 mod tests {
@@ -18,6 +17,17 @@ mod tests {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-pull");
         let queue_info = mq.create_queue(&queue_name);
+    }
+
+    #[test]
+    fn create_queue_with_config() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-pull");
+        let mut config = QueueInfo::new(queue_name.clone());
+        let message_timeout: u32 = 120;
+        config.message_timeout(message_timeout.clone());
+        let queue_info = mq.create_queue_with_config(&queue_name, &config);
+        assert_eq!(queue_info.message_timeout.unwrap(), message_timeout);
     }
 
     #[test] 

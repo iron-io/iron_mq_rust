@@ -1,6 +1,8 @@
-use super::*;
+pub mod queue_info;
 
 use serde_json::{Error, Value};
+
+use super::*;
 
 pub struct Queue<'a> {
     pub client: &'a mut Client,
@@ -73,14 +75,3 @@ impl<'a> Queue<'a> {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct QueueInfo {
-    pub name: String,
-    pub project_id: String,
-    pub message_timeout: u32,
-    pub message_expiration: u32,
-    #[serde(rename = "type")] 
-    pub queue_type: String,
-    pub size: Option<usize>,
-    pub total_messages: Option<usize>,
-}
