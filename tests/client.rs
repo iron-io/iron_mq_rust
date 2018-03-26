@@ -25,9 +25,15 @@ mod tests {
         let queue_name = String::from("test-pull");
         let mut config = QueueInfo::new(queue_name.clone());
         let message_timeout: u32 = 120;
-        config.message_timeout(message_timeout.clone());
+        let message_expiration: u32 = 5000;
+        config
+            .message_timeout(message_timeout.clone())
+            .message_expiration(message_expiration.clone());
+        
         let queue_info = mq.create_queue_with_config(&queue_name, &config);
+        
         assert_eq!(queue_info.message_timeout.unwrap(), message_timeout);
+        assert_eq!(queue_info.message_expiration.unwrap(), message_expiration);
     }
 
     #[test] 
