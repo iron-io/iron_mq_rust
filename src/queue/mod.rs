@@ -39,8 +39,7 @@ impl<'a> Queue<'a> {
     }
 
     pub fn push_message(&mut self, message: Message) -> Result<String, String> {
-        let mut messages: Vec<Message> = Vec::new();
-        messages.push(message);
+        let messages: Vec<Message> = vec![message];
         let mut ids = match self.push_messages(messages) {
             Ok(ids) => ids,
             Err(e) => return Err(e),
