@@ -38,15 +38,18 @@ impl<'a> Queue<'a> {
         queue_info
     }
 
-    pub fn push_message(&mut self, message: Message) -> String {
+    pub fn push_message(&mut self, message: Message) -> Result<String, String> {
         let mut messages: Vec<Message> = Vec::new();
         messages.push(message);
-        let mut ids = self.push_messages(messages);
+        let mut ids = match self.push_messages(messages) {
+            Ok(ids) => ids,
+            Err(e) => return Err(e),
+        };
 
-        ids.pop().unwrap()
+        Ok(ids.pop().unwrap())
     }
 
-    pub fn push_messages(&mut self, messages: Vec<Message>) -> Vec<String> {
+    pub fn push_messages(&mut self, messages: Vec<Message>) -> Result<Vec<String>, String> {
         let path = format!("{}queues/{}/messages", self.client.base_path, self.name);
         let mut req = Request::new(Method::Post, path.parse().unwrap());
         req.headers_mut().set(ContentType::json());
@@ -74,10 +77,13 @@ impl<'a> Queue<'a> {
             .run(post)
             .unwrap();
 
-        let response: Value = serde_json::from_slice(&res).unwrap();
-        let ids: Vec<String> = serde_json::from_value(response["ids"].clone()).unwrap();
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let ids: Vec<String> = match serde_json::from_value(v["ids"].clone()) {
+            Ok(ids) => ids,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
 
-        ids
+        Ok(ids)
     }
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {

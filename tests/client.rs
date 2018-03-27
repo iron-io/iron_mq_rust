@@ -86,7 +86,7 @@ mod tests {
         let id = q.push_message(Message::with_body("test message"));
         let queue_info_after_push = q.info();
 
-        assert!(id.len() > 0);
+        assert!(id.unwrap().len() > 0);
         assert_eq!(queue_info_before_push.size.unwrap() + 1, queue_info_after_push.size.unwrap());
     }
 
@@ -107,7 +107,7 @@ mod tests {
         let ids = q.push_messages(messages);
         let queue_info_after_push = q.info();
 
-        assert!(ids.len() == 3);
+        assert!(ids.unwrap().len() == 3);
         assert_eq!(queue_info_before_push.size.unwrap() + message_count, queue_info_after_push.size.unwrap());
     }
 
