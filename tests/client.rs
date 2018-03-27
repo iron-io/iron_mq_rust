@@ -2,6 +2,7 @@ extern crate iron_mq_rust;
 
 use iron_mq_rust::*;
 use iron_mq_rust::queue::queue_info::QueueInfo;
+use iron_mq_rust::queue::message::Message;
 
 #[cfg(test)]
 mod tests {
@@ -82,11 +83,32 @@ mod tests {
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
         let queue_info_before_push = q.info();
-        let id = q.push_message("test message");
+        let id = q.push_message(Message::with_body("test message"));
         let queue_info_after_push = q.info();
 
-        assert!(id.len() > 0);
+        assert!(id.unwrap().len() > 0);
         assert_eq!(queue_info_before_push.size.unwrap() + 1, queue_info_after_push.size.unwrap());
+    }
+
+    #[test]
+    fn push_messages() {
+        let mut messages: Vec<Message> = Vec::new();
+        messages.push(Message::new("first", 60));
+        messages.push(Message::with_body("second"));
+        messages.push(Message::with_body("third"));
+        let message_count = messages.len();
+
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-pull-multiply");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name);
+
+        let queue_info_before_push = q.info();
+        let ids = q.push_messages(messages);
+        let queue_info_after_push = q.info();
+
+        assert!(ids.unwrap().len() == 3);
+        assert_eq!(queue_info_before_push.size.unwrap() + message_count, queue_info_after_push.size.unwrap());
     }
 
     #[test]
