@@ -180,6 +180,24 @@ mod tests {
     }
 
     #[test]
+    fn delete_messages() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-messages-delete");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let messages = vec![
+            Message::with_body("One"),
+            Message::with_body("Two"),
+            Message::with_body("Three"),
+        ];
+        let ids = q.push_messages(messages).unwrap();
+        let messages = q.reserve_messages(3);
+        let msg = q.delete_messages(messages.unwrap());
+        assert!(msg.contains("Deleted"));
+        q.delete();
+    }
+
+    #[test]
     #[should_panic]
     fn delete_queue() {
         let mut mq = Client::from_env();

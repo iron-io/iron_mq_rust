@@ -4,8 +4,7 @@ pub mod message;
 use serde_json::{Value};
 
 use super::*;
-use message::Message;
-use message::ReservationConfig;
+use message::{Message, ReservationConfig, MessageIds};
 
 pub struct Queue<'a> {
     pub client: &'a mut Client,
@@ -174,6 +173,43 @@ impl<'a> Queue<'a> {
     pub fn reserve_message(&mut self) -> Result<Message, String> {
         let default_timeout = 60;
         self.reserve_message_with_timeout(default_timeout)
+    }
+
+    pub fn delete_messages(&mut self, messages: Vec<Message>) -> String {
+        let path = format!("{}queues/{}/messages", self.client.base_path, self.name).parse().unwrap();
+        let mut req = Request::new(Method::Delete, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+        let ids: Vec<MessageIds> = messages
+            .into_iter()
+            .map(|m| {
+                MessageIds::new(m.id.unwrap(), m.reservation_id.unwrap())
+            }).collect();
+
+        let body = json!({
+            "ids": ids
+        });
+
+        req.set_body(body.to_string());
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
     }
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {

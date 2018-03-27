@@ -47,3 +47,18 @@ impl ReservationConfig {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MessageIds {
+    pub id: String,
+    pub reservation_id: String,
+}
+
+impl MessageIds {
+    pub fn new(id: String, reservation_id: String) -> MessageIds {
+        MessageIds {
+            id,
+            reservation_id,
+        }
+    }
+}
