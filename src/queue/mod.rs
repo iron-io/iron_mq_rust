@@ -5,6 +5,7 @@ use serde_json::{Value};
 
 use super::*;
 use message::Message;
+use message::ReservationConfig;
 
 pub struct Queue<'a> {
     pub client: &'a mut Client,
@@ -56,11 +57,9 @@ impl<'a> Queue<'a> {
         let authorization_header = format!("OAuth {}", self.client.token);
         req.headers_mut().set(Authorization(authorization_header));
 
-        let message = json!(
-            {
-                "messages": messages
-            }
-        );
+        let message = json!({
+            "messages": messages
+        });
 
         req.set_body(message.to_string());
 
@@ -114,7 +113,68 @@ impl<'a> Queue<'a> {
         Ok(message)
     }
 
+    pub fn long_poll(&mut self, count: u8, timeout: u32, wait: u32, delete: bool) -> Result<Vec<Message>, String> {
+        let path = format!("{}queues/{}/reservations", self.client.base_path, self.name);
+        let mut req = Request::new(Method::Post, path.parse().unwrap());
+        req.headers_mut().set(ContentType::json());
 
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let reservation_config = json!(
+            ReservationConfig::new(count, timeout, wait, delete)
+        );
+
+        req.set_body(reservation_config.to_string());
+
+        let get = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(get)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let messages: Vec<Message> = match serde_json::from_value(v["messages"].clone()) {
+            Ok(messages) => messages,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
+
+        Ok(messages)
+    }
+
+    pub fn reserve_messages_with_timeout(&mut self, count: u8, timeout: u32) -> Result<Vec<Message>, String> {
+        let default_wait = 0;
+        let delete = false;
+
+        self.long_poll(count, timeout, default_wait, delete)
+    }
+
+    pub fn reserve_message_with_timeout(&mut self, timeout: u32) -> Result<Message, String> {
+        let default_count = 1;
+        
+        let mut messages = match self.reserve_messages_with_timeout(default_count, timeout) {
+            Ok(messages) => messages,
+            Err(e) => return Err(e)
+        };
+
+        Ok(messages.pop().unwrap())
+    }
+
+    pub fn reserve_messages(&mut self, count: u8) -> Result<Vec<Message>, String> {
+        let default_timeout = 60;
+        self.reserve_messages_with_timeout(count, default_timeout)
+    }
+
+    pub fn reserve_message(&mut self) -> Result<Message, String> {
+        let default_timeout = 60;
+        self.reserve_message_with_timeout(default_timeout)
+    }
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name).parse().expect("Incorrect path");
@@ -171,4 +231,5 @@ impl<'a> Queue<'a> {
             .run(delete)
             .unwrap();
     }
+
 }

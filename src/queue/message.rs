@@ -28,3 +28,22 @@ impl Message {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReservationConfig {
+    n: u8,
+    timeout: u32,
+    wait: u32,
+    delete: bool,
+}
+
+impl ReservationConfig {
+    pub fn new(n: u8, timeout: u32, wait: u32, delete: bool) -> ReservationConfig {
+        ReservationConfig {
+            n,
+            timeout,
+            wait,
+            delete,
+        }
+    }
+}

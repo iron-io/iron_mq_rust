@@ -15,7 +15,7 @@ use futures::{Future, Stream};
 use hyper::{Method, Request};
 use hyper::header::{Authorization, ContentType};
 use http_client::*;
-use serde_json::{Error, Value};
+use serde_json::{Value};
 use std::env;
 use std::collections::HashMap;
 
@@ -89,6 +89,7 @@ impl Client {
 
         queue_info
     }
+    
 }
 
 fn get_from_env(variable: &str) -> String {
