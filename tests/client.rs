@@ -30,9 +30,9 @@ mod tests {
         config
             .message_timeout(message_timeout.clone())
             .message_expiration(message_expiration.clone());
-        
+
         let queue_info = mq.create_queue_with_config(&queue_name, &config);
-        
+
         assert_eq!(queue_info.message_timeout.unwrap(), message_timeout);
         assert_eq!(queue_info.message_expiration.unwrap(), message_expiration);
     }
@@ -51,12 +51,12 @@ mod tests {
             .message_expiration(message_expiration.clone());
 
         let updated_info: QueueInfo = q.update(&config).unwrap();
-        
+
         assert_eq!(updated_info.message_timeout.unwrap(), message_timeout);
         assert_eq!(updated_info.message_expiration.unwrap(), message_expiration);
     }
 
-    #[test] 
+    #[test]
     fn get_queue() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-pull");
@@ -65,7 +65,7 @@ mod tests {
         assert_eq!(q.name, queue_name);
     }
 
-    #[test] 
+    #[test]
     fn get_queue_info() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-pull");
@@ -87,7 +87,10 @@ mod tests {
         let queue_info_after_push = q.info();
 
         assert!(id.unwrap().len() > 0);
-        assert_eq!(queue_info_before_push.size.unwrap() + 1, queue_info_after_push.size.unwrap());
+        assert_eq!(
+            queue_info_before_push.size.unwrap() + 1,
+            queue_info_after_push.size.unwrap()
+        );
     }
 
     #[test]
@@ -108,7 +111,10 @@ mod tests {
         let queue_info_after_push = q.info();
 
         assert!(ids.unwrap().len() == 3);
-        assert_eq!(queue_info_before_push.size.unwrap() + message_count, queue_info_after_push.size.unwrap());
+        assert_eq!(
+            queue_info_before_push.size.unwrap() + message_count,
+            queue_info_after_push.size.unwrap()
+        );
     }
 
     #[test]
@@ -121,6 +127,56 @@ mod tests {
         let id = q.push_message(Message::with_body("test message")).unwrap();
         let message = q.get_message(&id).unwrap();
         assert_eq!(id, message.id.unwrap());
+    }
+
+    #[test]
+    fn reserve_message() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-reserve");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let queue_info_before_push = q.info();
+        let id = q.push_message(Message::with_body("test reserve")).unwrap();
+        let message = q.reserve_message();
+        assert!(message.is_ok());
+    }
+
+    #[test]
+    fn reserve_messages() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-multiply-reserve");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let queue_info_before_push = q.info();
+        let messages = vec![
+            Message::with_body("One"),
+            Message::with_body("Two"),
+            Message::with_body("Three"),
+        ];
+        let ids = q.push_messages(messages).unwrap();
+        let messages = q.reserve_messages(3);
+        assert!(messages.is_ok());
+        assert_eq!(messages.unwrap().len(), 3);
+        q.delete();
+    }
+
+    #[test]
+    fn long_poll_messages() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-multiply-long-poll");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let queue_info_before_push = q.info();
+        let messages = vec![
+            Message::with_body("One"),
+            Message::with_body("Two"),
+            Message::with_body("Three"),
+        ];
+        let ids = q.push_messages(messages).unwrap();
+        let messages = q.long_poll(3, 30, 10, true);
+        assert!(messages.is_ok());
+        assert_eq!(messages.unwrap().len(), 3);
+        q.delete();
     }
 
     #[test]
