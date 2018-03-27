@@ -4,6 +4,7 @@ pub mod message;
 use serde_json::{Value};
 
 use super::*;
+use message::Message;
 
 pub struct Queue<'a> {
     pub client: &'a mut Client,
@@ -37,7 +38,15 @@ impl<'a> Queue<'a> {
         queue_info
     }
 
-    pub fn push_message(&mut self, message: &str) -> String {
+    pub fn push_message(&mut self, message: Message) -> String {
+        let mut messages: Vec<Message> = Vec::new();
+        messages.push(message);
+        let mut ids = self.push_messages(messages);
+
+        ids.pop().unwrap()
+    }
+
+    pub fn push_messages(&mut self, messages: Vec<Message>) -> Vec<String> {
         let path = format!("{}queues/{}/messages", self.client.base_path, self.name);
         let mut req = Request::new(Method::Post, path.parse().unwrap());
         req.headers_mut().set(ContentType::json());
@@ -47,11 +56,7 @@ impl<'a> Queue<'a> {
 
         let message = json!(
             {
-                "messages": [
-                    {
-                        "body": message
-                    }
-                ]
+                "messages": messages
             }
         );
 
@@ -70,7 +75,9 @@ impl<'a> Queue<'a> {
             .unwrap();
 
         let response: Value = serde_json::from_slice(&res).unwrap();
-        response["ids"][0].to_string()
+        let ids: Vec<String> = serde_json::from_value(response["ids"].clone()).unwrap();
+
+        ids
     }
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
