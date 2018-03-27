@@ -85,6 +85,37 @@ impl<'a> Queue<'a> {
         Ok(ids)
     }
 
+    pub fn get_message(&mut self, id: &String) -> Result<Message, String> {
+        let path = format!("{}queues/{}/messages/{}", self.client.base_path, self.name, id);
+        let mut req = Request::new(Method::Get, path.parse().unwrap());
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let get = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(get)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let message: Message = match serde_json::from_value(v["message"].clone()) {
+            Ok(message) => message,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
+
+        Ok(message)
+    }
+
+
+
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name).parse().expect("Incorrect path");
         let mut req = Request::new(Method::Patch, path);

@@ -112,6 +112,18 @@ mod tests {
     }
 
     #[test]
+    fn get_message() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-pull");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let queue_info_before_push = q.info();
+        let id = q.push_message(Message::with_body("test message")).unwrap();
+        let message = q.get_message(&id).unwrap();
+        assert_eq!(id, message.id.unwrap());
+    }
+
+    #[test]
     #[should_panic]
     fn delete_queue() {
         let mut mq = Client::from_env();
