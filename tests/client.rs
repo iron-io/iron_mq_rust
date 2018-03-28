@@ -180,6 +180,21 @@ mod tests {
     }
 
     #[test]
+    fn release_message() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-release");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let id = q.push_message(Message::with_body("test message for release")).unwrap();
+        let message = q.reserve_message().unwrap();
+        let delay = 70;
+        let msg = q.release_message(message.clone(), delay);
+
+        assert!(msg.contains("Released"));
+        assert!(!q.delete_message(message).contains("Deleted"));
+    }
+
+    #[test]
     fn delete_message() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-message-delete");
