@@ -4,7 +4,7 @@ pub mod message;
 use serde_json::{Value};
 
 use super::*;
-use message::{Message, ReservationConfig, MessageIds};
+use message::{Message, ReservationConfig};
 
 pub struct Queue<'a> {
     pub client: &'a mut Client,
@@ -216,10 +216,13 @@ impl<'a> Queue<'a> {
 
         let authorization_header = format!("OAuth {}", self.client.token);
         req.headers_mut().set(Authorization(authorization_header));
-        let ids: Vec<MessageIds> = messages
+        let ids: Vec<Value> = messages
             .into_iter()
             .map(|m| {
-                MessageIds::new(m.id.unwrap(), m.reservation_id.unwrap())
+                json!({
+                    "id": m.id,
+                    "reservation_id": m.reservation_id
+                })
             }).collect();
 
         let body = json!({
