@@ -1,4 +1,4 @@
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Message {
     pub body: String,
     #[serde(skip_serializing_if = "Option::is_none")] pub delay: Option<u32>,
