@@ -273,6 +273,23 @@ mod tests {
     }
 
     #[test]
+    fn clear_queue() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-clear-queue");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let messages = vec![
+            Message::with_body("One"),
+            Message::with_body("Two"),
+            Message::with_body("Three"),
+        ];
+        let ids = q.push_messages(messages).unwrap();
+        q.clear();
+        let messages_after_clear = q.peek_messages(100).unwrap();
+        assert_eq!(messages_after_clear.len(), 0);
+    }
+
+    #[test]
     #[should_panic]
     fn delete_queue() {
         let mut mq = Client::from_env();

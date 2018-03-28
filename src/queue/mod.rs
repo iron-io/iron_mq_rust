@@ -396,6 +396,35 @@ impl<'a> Queue<'a> {
         Ok(queue_info)
     }
 
+    pub fn clear(&mut self) -> String {
+        let path = format!("{}queues/{}/messages", self.client.base_path, self.name);
+        let mut req = Request::new(Method::Delete, path.parse().unwrap());
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+        
+        let body = json!({});
+        req.set_body(body.to_string());
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
     pub fn delete(&mut self) {
         let path = format!("{}queues/{}", self.client.base_path, self.name);
         let mut req = Request::new(Method::Delete, path.parse().unwrap());
