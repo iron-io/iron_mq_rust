@@ -287,6 +287,11 @@ impl<'a> Queue<'a> {
         Ok(new_reservation_id)
     }
 
+    pub fn touch_message(&mut self, message: Message) -> Result<String, String> {
+        let default_timeout = 60;
+        self.touch_message_with_timeout(message, default_timeout)
+    }
+
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name).parse().expect("Incorrect path");
         let mut req = Request::new(Method::Patch, path);

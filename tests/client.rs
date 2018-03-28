@@ -226,6 +226,20 @@ mod tests {
     }
 
     #[test]
+    fn touch_message() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-message-touch");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let m = Message::with_body("message for touch");
+        let id = q.push_message(m).unwrap();
+        let message = q.reserve_message().unwrap();
+        let new_reservation_id = q.touch_message(message);
+
+        assert!(new_reservation_id.is_ok());
+    }
+
+    #[test]
     #[should_panic]
     fn delete_queue() {
         let mut mq = Client::from_env();
