@@ -175,6 +175,46 @@ impl<'a> Queue<'a> {
         self.reserve_message_with_timeout(default_timeout)
     }
 
+    pub fn release_message(&mut self, message: Message, delay: u32) -> String {
+        let path = format!("{}queues/{}/messages/{}/release",
+            self.client.base_path,
+            self.name,
+            message.id.unwrap()
+        ).parse().expect("Incorrect path");
+
+        let mut req = Request::new(Method::Post, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        
+        let reservation_id = message.reservation_id.expect("Missed reservation id");
+        let body = json!({
+            "reservation_id": reservation_id,
+            "delay": delay
+        });
+
+        req.set_body(body.to_string());
+
+        let post = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(post)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
     pub fn delete_message(&mut self, message: Message) -> String {
         let message_id = message.id.expect("Missed message id");
         let path = format!("{}queues/{}/messages/{}", self.client.base_path, self.name, message_id).parse().unwrap();
