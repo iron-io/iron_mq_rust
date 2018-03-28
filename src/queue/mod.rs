@@ -292,6 +292,35 @@ impl<'a> Queue<'a> {
         self.touch_message_with_timeout(message, default_timeout)
     }
 
+    pub fn peek_messages(&mut self, count: u8) -> Result<Vec<Message>, String>{
+        let path = format!("{}queues/{}/messages?n={}", self.client.base_path, self.name, count).parse().expect("Incorrect patch");
+        let mut req = Request::new(Method::Get, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let get = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(get)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let messages: Vec<Message> = match serde_json::from_value(v["messages"].clone()) {
+            Ok(messages) => messages,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
+
+        Ok(messages)
+    }
+
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name).parse().expect("Incorrect path");
         let mut req = Request::new(Method::Patch, path);

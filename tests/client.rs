@@ -240,6 +240,24 @@ mod tests {
     }
 
     #[test]
+    fn peek_messages() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-messages-peek");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let messages = vec![
+            Message::with_body("One"),
+            Message::with_body("Two"),
+            Message::with_body("Three"),
+        ];
+        let ids = q.push_messages(messages).unwrap();
+        let earned_messages = q.peek_messages(3);
+        assert!(earned_messages.is_ok());
+        assert_eq!(earned_messages.unwrap().len(), 3);
+        q.delete();
+    }
+
+    #[test]
     #[should_panic]
     fn delete_queue() {
         let mut mq = Client::from_env();
