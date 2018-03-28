@@ -4,8 +4,7 @@ pub mod message;
 use serde_json::{Value};
 
 use super::*;
-use message::Message;
-use message::ReservationConfig;
+use message::{Message, ReservationConfig};
 
 pub struct Queue<'a> {
     pub client: &'a mut Client,
@@ -174,6 +173,152 @@ impl<'a> Queue<'a> {
     pub fn reserve_message(&mut self) -> Result<Message, String> {
         let default_timeout = 60;
         self.reserve_message_with_timeout(default_timeout)
+    }
+
+    pub fn delete_message(&mut self, message: Message) -> String {
+        let message_id = message.id.expect("Missed message id");
+        let path = format!("{}queues/{}/messages/{}", self.client.base_path, self.name, message_id).parse().unwrap();
+        let mut req = Request::new(Method::Delete, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let reservation_id = message.reservation_id.expect("Missed reservation id");
+        let body = json!({
+            "reservation_id": reservation_id
+        });
+
+        req.set_body(body.to_string());
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
+    pub fn delete_messages(&mut self, messages: Vec<Message>) -> String {
+        let path = format!("{}queues/{}/messages", self.client.base_path, self.name).parse().unwrap();
+        let mut req = Request::new(Method::Delete, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+        let ids: Vec<Value> = messages
+            .into_iter()
+            .map(|m| {
+                json!({
+                    "id": m.id,
+                    "reservation_id": m.reservation_id
+                })
+            }).collect();
+
+        let body = json!({
+            "ids": ids
+        });
+
+        req.set_body(body.to_string());
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
+    pub fn touch_message_with_timeout(&mut self, message: Message, timeout: u32) -> Result<String, String> {
+        let message_id = message.id.expect("Missed message id");
+        let path = format!("{}queues/{}/messages/{}/touch", self.client.base_path, self.name, message_id).parse().unwrap();
+        let mut req = Request::new(Method::Post, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let reservation_id = message.reservation_id.expect("Missed reservation id");
+        let body = json!({
+            "reservation_id": reservation_id,
+            "timeout": timeout
+        });
+
+        req.set_body(body.to_string());
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let new_reservation_id: String = match serde_json::from_value(v["reservation_id"].clone()) {
+            Ok(reservation_id) => reservation_id,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
+
+        Ok(new_reservation_id)
+    }
+
+    pub fn touch_message(&mut self, message: Message) -> Result<String, String> {
+        let default_timeout = 60;
+        self.touch_message_with_timeout(message, default_timeout)
+    }
+
+    pub fn peek_messages(&mut self, count: u8) -> Result<Vec<Message>, String>{
+        let path = format!("{}queues/{}/messages?n={}", self.client.base_path, self.name, count).parse().expect("Incorrect patch");
+        let mut req = Request::new(Method::Get, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let get = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(get)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let messages: Vec<Message> = match serde_json::from_value(v["messages"].clone()) {
+            Ok(messages) => messages,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
+
+        Ok(messages)
     }
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
