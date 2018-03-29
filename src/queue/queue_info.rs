@@ -1,4 +1,4 @@
-use super::*;
+use super::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct QueueInfo {

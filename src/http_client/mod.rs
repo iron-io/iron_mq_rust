@@ -4,11 +4,20 @@ extern crate hyper_tls;
 extern crate num_cpus;
 extern crate tokio_core;
 
-use hyper::Client;
-use hyper::client::HttpConnector;
+use hyper::{
+    Client,
+    Method,
+    Request,
+    client:: {
+         HttpConnector 
+    },
+    header::{
+        Authorization,
+        ContentType
+    }
+};
+
 use hyper_tls::HttpsConnector;
-use hyper::{Method, Request};
-use hyper::header::{Authorization, ContentType};
 use futures::{Future, Stream};
 
 pub struct HttpClient {
