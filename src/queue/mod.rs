@@ -136,6 +136,22 @@ impl<'a> Queue<'a> {
         self.reserve_message_with_timeout(default_timeout)
     }
 
+    pub fn pop_message(&mut self) -> Result<Message, String> {
+        let default_count = 1;
+
+        let mut messages = match self.pop_messages(default_count) {
+            Ok(messages) => messages,
+            Err(e) => return Err(e)
+        };
+
+        Ok(messages.pop().unwrap())
+    }
+
+    pub fn pop_messages(&mut self, count: u8) -> Result<Vec<Message>, String> {
+        let delete = true;
+        self.long_poll(count, 0, 0, delete) 
+    }
+
     pub fn release_message(&mut self, message: Message, delay: u32) -> String {
         let path = format!(
             "{}queues/{}/messages/{}/release",
