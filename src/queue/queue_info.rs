@@ -56,6 +56,12 @@ impl QueueInfo {
         self
     }
 
+    pub fn queue_type(&mut self, queue_type: QueueType) -> &mut QueueInfo {
+        self.queue_type = Some(queue_type);
+
+        self
+    }
+
     pub fn push(&mut self, push: PushInfo) -> &mut QueueInfo {
         self.push = Some(push);
 
@@ -71,10 +77,10 @@ impl QueueInfo {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PushInfo {
-    retries_delay: u32,
-    retries: u32,
-    subscribers: Vec<QueueSubscriber>,
-    error_queue: String,
+    pub retries_delay: u32,
+    pub retries: u32,
+    pub subscribers: Vec<QueueSubscriber>,
+    pub error_queue: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -86,10 +92,12 @@ pub struct QueueSubscriber {
 
 impl QueueSubscriber {
     pub fn new(name: &str, url: &str) -> QueueSubscriber {
+        let mut headers: HashMap<String, String> = HashMap::new();
+        headers.insert("Content-Type".to_string(), "application/json".to_string());
         QueueSubscriber {
             name: String::from(name),
             url: String::from(url),
-            headers: HashMap::new()
+            headers: headers
         }
     }
 }

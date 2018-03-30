@@ -1,7 +1,7 @@
 extern crate iron_mq_rust;
 
 use iron_mq_rust::*;
-use iron_mq_rust::queue::queue_info::{ QueueInfo, Alert, AlertType, Direction };
+use iron_mq_rust::queue::queue_info::{ QueueInfo, Alert, AlertType, Direction, PushInfo, QueueSubscriber, QueueType };
 use iron_mq_rust::queue::message::Message;
 
 #[cfg(test)]
@@ -61,6 +61,33 @@ mod tests {
 
         let mut q = mq.queue(queue_info.name);
         q.delete();
+    }
+
+    #[test]
+    fn create_push_queue() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-push");
+        let mut config = QueueInfo::new(queue_name.clone());
+        let message_timeout: u32 = 120;
+        let message_expiration: u32 = 5000;
+        let subscribers = vec![QueueSubscriber::new("subscriber_name", "http://wwww.subscriber1.com")];
+        let push_info = PushInfo {
+            retries_delay: 3000,
+            retries: 1,
+            subscribers: subscribers,
+            error_queue: "Test error".to_string(),
+        };
+        config
+            .message_timeout(message_timeout.clone())
+            .message_expiration(message_expiration.clone())
+            .queue_type(QueueType::Multicast)
+            .push(push_info);
+
+        let queue_info = mq.create_queue_with_config(&queue_name, &config);
+
+        let mut q = mq.queue(queue_info.name);
+        assert!(q.push_message(Message::with_body("Test push")).is_ok());
+        q.delete()
     }
 
     #[test]
