@@ -360,6 +360,38 @@ impl<'a> Queue<'a> {
 
         Ok(messages)
     }
+    
+    pub fn add_subscribers(&mut self, subscribers: Vec<QueueSubscriber>) -> String {
+        let path = format!("{}queues/{}/subscribers", self.client.base_path, self.name).parse().unwrap();
+        let mut req = Request::new(Method::Post, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let body = json!({
+            "subscribers": subscribers
+        });
+
+        req.set_body(body.to_string());
+
+        let delete = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(delete)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name).parse().expect("Incorrect path");

@@ -16,14 +16,14 @@ mod tests {
     #[test]
     fn create_queue() {
         let mut mq = Client::from_env();
-        let queue_name = String::from("test-pull");
+        let queue_name = String::from("test");
         let queue_info = mq.create_queue(&queue_name);
     }
 
     #[test]
     fn create_queue_with_config() {
         let mut mq = Client::from_env();
-        let queue_name = String::from("test-pull");
+        let queue_name = String::from("test");
         let mut config = QueueInfo::new(queue_name.clone());
         let message_timeout: u32 = 120;
         let message_expiration: u32 = 5000;
@@ -86,7 +86,9 @@ mod tests {
         let queue_info = mq.create_queue_with_config(&queue_name, &config);
 
         let mut q = mq.queue(queue_info.name);
-        assert!(q.push_message(Message::with_body("Test push")).is_ok());
+        let new_subscribers = vec![QueueSubscriber::new("subscriber_name", "http://wwww.subscriber2.com")];
+        let msg = q.add_subscribers(new_subscribers);
+        assert!(msg.contains("Updated"));
         q.delete()
     }
 
@@ -112,7 +114,7 @@ mod tests {
     #[test]
     fn get_queue() {
         let mut mq = Client::from_env();
-        let queue_name = String::from("test-pull");
+        let queue_name = String::from("test");
         let q = mq.queue(queue_name.clone());
 
         assert_eq!(q.name, queue_name);
@@ -121,7 +123,7 @@ mod tests {
     #[test]
     fn get_queue_info() {
         let mut mq = Client::from_env();
-        let queue_name = String::from("test-pull");
+        let queue_name = String::from("test");
         let info = mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name);
         let queue_info = q.info();
@@ -132,7 +134,7 @@ mod tests {
     #[test]
     fn push_message() {
         let mut mq = Client::from_env();
-        let queue_name = String::from("test-pull");
+        let queue_name = String::from("test");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
         let queue_info_before_push = q.info();
@@ -173,7 +175,7 @@ mod tests {
     #[test]
     fn get_message() {
         let mut mq = Client::from_env();
-        let queue_name = String::from("test-pull");
+        let queue_name = String::from("test");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
         let queue_info_before_push = q.info();
