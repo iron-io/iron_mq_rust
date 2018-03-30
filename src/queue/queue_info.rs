@@ -1,6 +1,14 @@
 use super::*;
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum QueueType {
+    Pull,
+    Unicast,
+    Multicast
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct QueueInfo {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")] pub project_id: Option<String>,
@@ -12,7 +20,7 @@ pub struct QueueInfo {
     #[serde(skip_serializing_if = "Option::is_none")] pub alerts: Option<Vec<Alert>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "type")]
-    pub queue_type: Option<String>,
+    pub queue_type: Option<QueueType>,
 }
 
 impl QueueInfo {
@@ -22,7 +30,7 @@ impl QueueInfo {
             project_id: None,
             message_timeout: None,
             message_expiration: None,
-            queue_type: None,
+            queue_type: Some(QueueType::Pull),
             size: None,
             total_messages: None,
             push: None,
@@ -74,6 +82,16 @@ pub struct QueueSubscriber {
     name: String,
     url: String,
     headers: HashMap<String, String>,
+}
+
+impl QueueSubscriber {
+    pub fn new(name: &str, url: &str) -> QueueSubscriber {
+        QueueSubscriber {
+            name: String::from(name),
+            url: String::from(url),
+            headers: HashMap::new()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
