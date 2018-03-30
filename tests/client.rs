@@ -70,7 +70,7 @@ mod tests {
         let mut config = QueueInfo::new(queue_name.clone());
         let message_timeout: u32 = 120;
         let message_expiration: u32 = 5000;
-        let subscribers = vec![QueueSubscriber::new("subscriber_name", "http://wwww.subscriber1.com")];
+        let subscribers = vec![QueueSubscriber::new("subscriber1", "http://wwww.subscriber1.com")];
         let push_info = PushInfo {
             retries_delay: 3000,
             retries: 1,
@@ -86,9 +86,23 @@ mod tests {
         let queue_info = mq.create_queue_with_config(&queue_name, &config);
 
         let mut q = mq.queue(queue_info.name);
-        let new_subscribers = vec![QueueSubscriber::new("subscriber_name", "http://wwww.subscriber2.com")];
+        let new_subscribers = vec![
+            QueueSubscriber::new("subscriber2", "http://wwww.subscriber2.com")
+        ];
         let msg = q.add_subscribers(new_subscribers);
         assert!(msg.contains("Updated"));
+
+        let subscribers_for_replace = vec![
+            QueueSubscriber::new("subscriber3", "http://wwww.subscriber3.com"),
+            QueueSubscriber::new("subscriber4", "http://wwww.subscriber4.com")
+        ];
+
+        q.replace_subscribers(subscribers_for_replace);
+        assert_eq!(q.info().push.unwrap().subscribers.len(), 2);
+
+        q.remove_subscribers(vec![QueueSubscriber::new("subscriber3", "http://wwww.subscriber3.com")]);
+        
+        assert_eq!(q.info().push.unwrap().subscribers.len(), 1);
         q.delete()
     }
 

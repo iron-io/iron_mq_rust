@@ -375,6 +375,70 @@ impl<'a> Queue<'a> {
 
         req.set_body(body.to_string());
 
+        let post = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(post)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
+    pub fn replace_subscribers(&mut self, subscribers: Vec<QueueSubscriber>) -> String {
+        let path = format!("{}queues/{}/subscribers", self.client.base_path, self.name).parse().unwrap();
+        let mut req = Request::new(Method::Put, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let body = json!({
+            "subscribers": subscribers
+        });
+
+        req.set_body(body.to_string());
+
+        let put = self.client
+            .http_client
+            .client
+            .request(req)
+            .and_then(|res| res.body().concat2());
+
+        let res = self.client
+            .http_client
+            .core
+            .run(put)
+            .unwrap();
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
+    pub fn remove_subscribers(&mut self, subscribers: Vec<QueueSubscriber>) -> String {
+        let path = format!("{}queues/{}/subscribers", self.client.base_path, self.name).parse().unwrap();
+        let mut req = Request::new(Method::Delete, path);
+        req.headers_mut().set(ContentType::json());
+
+        let authorization_header = format!("OAuth {}", self.client.token);
+        req.headers_mut().set(Authorization(authorization_header));
+
+        let body = json!({
+            "subscribers": subscribers
+        });
+
+        req.set_body(body.to_string());
+
         let delete = self.client
             .http_client
             .client
