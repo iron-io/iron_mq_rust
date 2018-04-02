@@ -111,11 +111,15 @@ impl Alert {
         }
     }
 
-    pub fn set_snooze(&mut self, snooze: u32) {
+    pub fn snooze(&mut self, snooze: u32) -> &mut Alert {
         self.snooze = Some(snooze);
+
+        self
     }
 
-    pub fn set_direction(&mut self, direction: Direction) {
+    pub fn direction(&mut self, direction: Direction) -> &mut Alert {
         self.direction = Some(direction);
+
+        self
     }
 }

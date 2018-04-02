@@ -39,14 +39,15 @@ mod tests {
 
     #[test]
     fn create_queue_with_alerts() {
-       let mut mq = Client::from_env();
+        let mut mq = Client::from_env();
         let queue_name = String::from("test-alert");
         let mut config = QueueInfo::new(queue_name.clone());
         let message_timeout: u32 = 120;
         let message_expiration: u32 = 5000;
         let mut alert = Alert::new(AlertType::Progressive, 5, &queue_name);
-        alert.set_direction(Direction::Asc);
-        alert.set_snooze(5);
+        alert
+            .direction(Direction::Asc)
+            .snooze(5);
         
         let alerts = vec![alert];
         config
@@ -57,6 +58,9 @@ mod tests {
         let queue_info = mq.create_queue_with_config(&queue_name, &config);
 
         assert_eq!(queue_info.alerts.unwrap().len(), 1);
+
+        let mut q = mq.queue(queue_info.name);
+        q.delete();
     }
 
     #[test]
