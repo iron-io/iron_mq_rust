@@ -1,7 +1,7 @@
 extern crate iron_mq_rust;
 
 use iron_mq_rust::*;
-use iron_mq_rust::queue::queue_info::QueueInfo;
+use iron_mq_rust::queue::queue_info::{ QueueInfo, Alert, AlertType, Direction };
 use iron_mq_rust::queue::message::Message;
 
 #[cfg(test)]
@@ -35,6 +35,32 @@ mod tests {
 
         assert_eq!(queue_info.message_timeout.unwrap(), message_timeout);
         assert_eq!(queue_info.message_expiration.unwrap(), message_expiration);
+    }
+
+    #[test]
+    fn create_queue_with_alerts() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-alert");
+        let mut config = QueueInfo::new(queue_name.clone());
+        let message_timeout: u32 = 120;
+        let message_expiration: u32 = 5000;
+        let mut alert = Alert::new(AlertType::Progressive, 5, &queue_name);
+        alert
+            .direction(Direction::Asc)
+            .snooze(5);
+        
+        let alerts = vec![alert];
+        config
+            .message_timeout(message_timeout.clone())
+            .message_expiration(message_expiration.clone())
+            .alerts(alerts);
+
+        let queue_info = mq.create_queue_with_config(&queue_name, &config);
+
+        assert_eq!(queue_info.alerts.unwrap().len(), 1);
+
+        let mut q = mq.queue(queue_info.name);
+        q.delete();
     }
 
     #[test]

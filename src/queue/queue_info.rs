@@ -9,7 +9,7 @@ pub struct QueueInfo {
     #[serde(skip_serializing_if = "Option::is_none")] pub size: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")] pub total_messages: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")] pub push: Option<PushInfo>,
-    #[serde(skip_serializing_if = "Option::is_none")] pub alerts: Option<Alert>,
+    #[serde(skip_serializing_if = "Option::is_none")] pub alerts: Option<Vec<Alert>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "type")]
     pub queue_type: Option<String>,
@@ -54,7 +54,7 @@ impl QueueInfo {
         self
     }
 
-    pub fn alerts(&mut self, alerts: Alert) -> &mut QueueInfo {
+    pub fn alerts(&mut self, alerts: Vec<Alert>) -> &mut QueueInfo {
         self.alerts = Some(alerts);
 
         self
@@ -77,10 +77,49 @@ pub struct QueueSubscriber {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum Direction {
+    Asc,
+    Desc,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum AlertType {
+    Fixed,
+    Progressive,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Alert {
-    #[serde(rename = "type")] alert_type: String,
-    trigger: u32,
-    direction: String,
-    queue: String,
-    snooze: u32,
+    #[serde(rename = "type")] 
+    pub alert_type: AlertType,
+    pub trigger: u32,
+    pub queue: String,
+    #[serde(skip_serializing_if = "Option::is_none")] pub snooze: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")] pub direction: Option<Direction>
+}
+
+impl Alert {
+    pub fn new(alert_type: AlertType, trigger: u32, queue: &str) -> Alert {
+        Alert {
+            alert_type: alert_type,
+            trigger: trigger,
+            queue: String::from(queue),
+            snooze: None,
+            direction: None
+        }
+    }
+
+    pub fn snooze(&mut self, snooze: u32) -> &mut Alert {
+        self.snooze = Some(snooze);
+
+        self
+    }
+
+    pub fn direction(&mut self, direction: Direction) -> &mut Alert {
+        self.direction = Some(direction);
+
+        self
+    }
 }
