@@ -17,7 +17,6 @@ use hyper::header::{Authorization, ContentType};
 use http_client::*;
 use serde_json::{Value};
 use std::env;
-use std::collections::HashMap;
 
 use queue::*;
 use queue::queue_info::*;

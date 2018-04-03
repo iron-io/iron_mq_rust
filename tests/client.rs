@@ -1,4 +1,5 @@
 extern crate iron_mq_rust;
+use std::collections::HashMap;
 
 use iron_mq_rust::*;
 use iron_mq_rust::queue::queue_info::{ QueueInfo, Alert, AlertType, Direction, PushInfo, QueueSubscriber, QueueType };
@@ -70,7 +71,10 @@ mod tests {
         let mut config = QueueInfo::new(queue_name.clone());
         let message_timeout: u32 = 120;
         let message_expiration: u32 = 5000;
-        let subscribers = vec![QueueSubscriber::new("subscriber1", "http://wwww.subscriber1.com")];
+        let mut subscribers = vec![QueueSubscriber::new("subscriber1", "http://wwww.subscriber1.com")];
+        let mut headers: HashMap<String, String> = HashMap::new();
+        headers.insert("Content-Type".to_string(), "application/json".to_string());
+        subscribers[0].headers(headers);
         let push_info = PushInfo {
             retries_delay: 3000,
             retries: 1,

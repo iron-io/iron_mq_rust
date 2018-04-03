@@ -1,4 +1,4 @@
-use super::*;
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -87,18 +87,20 @@ pub struct PushInfo {
 pub struct QueueSubscriber {
     name: String,
     url: String,
-    headers: HashMap<String, String>,
+    #[serde(skip_serializing_if = "Option::is_none")] headers: Option<HashMap<String, String>>,
 }
 
 impl QueueSubscriber {
     pub fn new(name: &str, url: &str) -> QueueSubscriber {
-        let mut headers: HashMap<String, String> = HashMap::new();
-        headers.insert("Content-Type".to_string(), "application/json".to_string());
         QueueSubscriber {
             name: String::from(name),
             url: String::from(url),
-            headers: headers
+            headers: None
         }
+    }
+
+    pub fn headers(&mut self, headers: HashMap<String, String>) {
+        self.headers = Some(headers);
     }
 }
 
