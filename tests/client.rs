@@ -11,7 +11,7 @@ mod tests {
 
     #[test]
     fn init_client() {
-        let mq = Client::from_env();
+        let _mq = Client::from_env();
     }
 
     #[test]
@@ -199,7 +199,7 @@ mod tests {
         let queue_name = String::from("test");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
-        let queue_info_before_push = q.info();
+        let _queue_info_before_push = q.info();
         let id = q.push_message(Message::with_body("test message")).unwrap();
         let message = q.get_message(&id).unwrap();
         assert_eq!(id, message.id.unwrap());
@@ -211,8 +211,8 @@ mod tests {
         let queue_name = String::from("test-reserve");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
-        let queue_info_before_push = q.info();
-        let id = q.push_message(Message::with_body("test reserve")).unwrap();
+        let _queue_info_before_push = q.info();
+        let _id = q.push_message(Message::with_body("test reserve")).unwrap();
         let message = q.reserve_message();
         assert!(message.is_ok());
     }
@@ -223,13 +223,13 @@ mod tests {
         let queue_name = String::from("test-multiply-reserve");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
-        let queue_info_before_push = q.info();
+        let _queue_info_before_push = q.info();
         let messages = vec![
             Message::with_body("One"),
             Message::with_body("Two"),
             Message::with_body("Three"),
         ];
-        let ids = q.push_messages(messages).unwrap();
+        let _ids = q.push_messages(messages).unwrap();
         let messages = q.reserve_messages(3);
         assert!(messages.is_ok());
         assert_eq!(messages.unwrap().len(), 3);
@@ -242,13 +242,13 @@ mod tests {
         let queue_name = String::from("test-multiply-long-poll");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
-        let queue_info_before_push = q.info();
+        let _queue_info_before_push = q.info();
         let messages = vec![
             Message::with_body("One"),
             Message::with_body("Two"),
             Message::with_body("Three"),
         ];
-        let ids = q.push_messages(messages).unwrap();
+        let _ids = q.push_messages(messages).unwrap();
         let messages = q.long_poll(3, 30, 10, true);
         assert!(messages.is_ok());
         assert_eq!(messages.unwrap().len(), 3);
@@ -261,7 +261,7 @@ mod tests {
         let queue_name = String::from("test-release");
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
-        let id = q.push_message(Message::with_body("test message for release")).unwrap();
+        let _id = q.push_message(Message::with_body("test message for release")).unwrap();
         let message = q.reserve_message().unwrap();
         let delay = 70;
         let msg = q.release_message(message.clone(), delay);
@@ -277,7 +277,7 @@ mod tests {
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
         let m = Message::with_body("message for delete");
-        let id = q.push_message(m).unwrap();
+        let _id = q.push_message(m).unwrap();
         let message = q.reserve_message().unwrap();
         let msg = q.delete_message(message);
         assert!(msg.contains("Deleted"));
@@ -295,7 +295,7 @@ mod tests {
             Message::with_body("Two"),
             Message::with_body("Three"),
         ];
-        let ids = q.push_messages(messages).unwrap();
+        let _ids = q.push_messages(messages).unwrap();
         let messages = q.reserve_messages(3);
         let msg = q.delete_messages(messages.unwrap());
         assert!(msg.contains("Deleted"));
@@ -309,7 +309,7 @@ mod tests {
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
         let m = Message::with_body("message for touch");
-        let id = q.push_message(m).unwrap();
+        let _id = q.push_message(m).unwrap();
         let message = q.reserve_message().unwrap();
         let new_reservation_id = q.touch_message_with_timeout(message, 120);
 
@@ -323,7 +323,7 @@ mod tests {
         mq.create_queue(&queue_name);
         let mut q = mq.queue(queue_name.clone());
         let m = Message::with_body("message for touch");
-        let id = q.push_message(m).unwrap();
+        let _id = q.push_message(m).unwrap();
         let message = q.reserve_message().unwrap();
         let new_reservation_id = q.touch_message(message);
 
@@ -341,7 +341,7 @@ mod tests {
             Message::with_body("Two"),
             Message::with_body("Three"),
         ];
-        let ids = q.push_messages(messages).unwrap();
+        let _ids = q.push_messages(messages).unwrap();
         let earned_messages = q.peek_messages(3);
         assert!(earned_messages.is_ok());
         assert_eq!(earned_messages.unwrap().len(), 3);
@@ -359,7 +359,7 @@ mod tests {
             Message::with_body("Two"),
             Message::with_body("Three"),
         ];
-        let ids = q.push_messages(messages).unwrap();
+        let _ids = q.push_messages(messages).unwrap();
         q.clear();
         let messages_after_clear = q.peek_messages(100).unwrap();
         assert_eq!(messages_after_clear.len(), 0);

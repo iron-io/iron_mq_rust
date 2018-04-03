@@ -11,31 +11,27 @@ extern crate serde_json;
 extern crate serde_derive;
 extern crate serde;
 
-use futures::{Future, Stream};
-use hyper::{Method, Request};
-use hyper::header::{Authorization, ContentType};
-use http_client::*;
+use hyper::{ Method };
 use serde_json::{Value};
 use std::env;
 
 use queue::*;
 use queue::queue_info::*;
+use http_client::*;
 
 pub struct Client {
     pub base_path: String,
-    http_client: HttpClient,
-    token: String,
+    http_client: HttpClient
 }
 
 impl Client {
     pub fn new(host: String, project_id: String, token: String) -> Client {
         let base_path = format!("https://{}/3/projects/{}/", host, project_id);
-        let http_client = HttpClient::new();
+        let http_client = HttpClient::new(token);
 
         Client {
             base_path,
             http_client,
-            token,
         }
     }
 
@@ -60,28 +56,13 @@ impl Client {
     }
 
     pub fn create_queue_with_config(&mut self, name: &String, config: &QueueInfo) -> QueueInfo {
-        let path = format!("{}queues/{}", self.base_path, name).parse().expect("Incorrect path");
-        let mut req = Request::new(Method::Put, path);
-        req.headers_mut().set(ContentType::json());
-
-        let authorization_header = format!("OAuth {}", self.token);
-        req.headers_mut().set(Authorization(authorization_header));
-
+        let path = format!("{}queues/{}", self.base_path, name);
+        
         let body = json!({
             "queue": config
         });
 
-        req.set_body(body.to_string());
-        let put = self.http_client
-            .client
-            .request(req)
-            .and_then(|res| res.body().concat2());
-
-        let res = self
-            .http_client
-            .core
-            .run(put)
-            .unwrap();
+        let res = self.http_client.request(Method::Put, path, body.to_string());
 
         let v: Value = serde_json::from_slice(&res).unwrap();
         let queue_info: QueueInfo = serde_json::from_value(v["queue"].clone()).unwrap();
