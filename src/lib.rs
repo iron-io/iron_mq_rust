@@ -14,8 +14,7 @@ extern crate serde;
 use hyper::{ Method };
 use serde_json::{Value};
 use std::{
-    env,
-    collections::HashMap
+    env
 };
 
 use queue::*;
