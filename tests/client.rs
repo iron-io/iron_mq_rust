@@ -103,6 +103,9 @@ mod tests {
         q.remove_subscribers(vec![QueueSubscriber::new("subscriber3", "http://wwww.subscriber3.com")]);
         
         assert_eq!(q.info().push.unwrap().subscribers.len(), 1);
+
+        let error = q.remove_subscribers(vec![QueueSubscriber::new("subscriber4", "http://wwww.subscriber4.com")]);
+        assert!(error.contains("Push queues must have at least one subscriber"));
         q.delete()
     }
 
