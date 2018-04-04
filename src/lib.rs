@@ -13,9 +13,7 @@ extern crate serde;
 
 use hyper::{ Method };
 use serde_json::{Value};
-use std::{
-    env
-};
+use std::env;
 
 use queue::*;
 use queue::queue_info::*;

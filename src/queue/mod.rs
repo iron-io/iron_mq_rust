@@ -243,6 +243,58 @@ impl<'a> Queue<'a> {
 
         Ok(messages)
     }
+    
+    pub fn add_subscribers(&mut self, subscribers: Vec<QueueSubscriber>) -> String {
+        let path = format!("{}queues/{}/subscribers", self.client.base_path, self.name);
+        
+        let body = json!({
+            "subscribers": subscribers
+        });
+
+        let res = self.client
+            .http_client
+            .request(Method::Post, path, body.to_string());
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
+    pub fn replace_subscribers(&mut self, subscribers: Vec<QueueSubscriber>) -> String {
+        let path = format!("{}queues/{}/subscribers", self.client.base_path, self.name);
+        
+        let body = json!({
+            "subscribers": subscribers
+        });
+
+        let res = self.client
+            .http_client
+            .request(Method::Put, path, body.to_string());
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
+    pub fn remove_subscribers(&mut self, subscribers: Vec<QueueSubscriber>) -> String {
+        let path = format!("{}queues/{}/subscribers", self.client.base_path, self.name);
+
+        let body = json!({
+            "subscribers": subscribers
+        });
+
+        let res = self.client
+            .http_client
+            .request(Method::Delete, path, body.to_string());
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let msg = v["msg"].to_string();
+
+        msg
+    }
+
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name)
