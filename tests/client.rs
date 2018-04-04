@@ -77,7 +77,7 @@ mod tests {
         subscribers[0].headers(headers);
         let push_info = PushInfo {
             retries_delay: 3000,
-            retries: 1,
+            retries: 10,
             subscribers: subscribers,
             error_queue: "Test error".to_string(),
         };
@@ -104,13 +104,19 @@ mod tests {
         q.replace_subscribers(subscribers_for_replace);
         assert_eq!(q.info().push.unwrap().subscribers.len(), 2);
 
+        let id = q.push_message(Message::with_body("test")).unwrap();
+        let push_statuses = q.get_push_statuses(id).unwrap();
+
+        assert!(push_statuses[0].subscriber_name.contains("subscriber3"));
+        assert!(push_statuses[1].subscriber_name.contains("subscriber4"));
+
         q.remove_subscribers(vec![QueueSubscriber::new("subscriber3", "http://wwww.subscriber3.com")]);
         
         assert_eq!(q.info().push.unwrap().subscribers.len(), 1);
 
         let error = q.remove_subscribers(vec![QueueSubscriber::new("subscriber4", "http://wwww.subscriber4.com")]);
         assert!(error.contains("Push queues must have at least one subscriber"));
-        q.delete()
+        q.delete();
     }
 
     #[test]
