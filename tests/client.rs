@@ -194,6 +194,19 @@ mod tests {
     }
 
     #[test]
+    fn push_strings() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-multiply-reserve");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        let queue_info_before_push = q.info();
+        let messages = vec!["One", "Two", "Three"];
+
+        let ids = q.push_strings(messages).unwrap();
+        assert_eq!(ids.len(), 3);
+    }
+
+    #[test]
     fn get_message() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test");

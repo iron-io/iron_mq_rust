@@ -53,6 +53,19 @@ impl<'a> Queue<'a> {
         Ok(ids)
     }
 
+    pub fn push_string(&mut self, body: &str) -> Result<String, String> {
+        let message = Message::with_body(body);
+        self.push_message(message)
+    }
+
+    pub fn push_strings(&mut self, bodies: Vec<&str>) -> Result<Vec<String>, String> {
+        let messages = bodies.into_iter()
+            .map(|b| {
+                Message::with_body(b)
+            }).collect();
+        self.push_messages(messages)
+    }
+
     pub fn get_message(&mut self, id: &String) -> Result<Message, String> {
         let path = format!(
             "{}queues/{}/messages/{}",
