@@ -19,6 +19,8 @@ use queue::*;
 use queue::queue_info::*;
 use http_client::*;
 
+const PER_PAGE: u8 = 30;
+
 pub struct Client {
     pub base_path: String,
     http_client: HttpClient
@@ -53,6 +55,29 @@ impl Client {
     pub fn create_queue(&mut self, name: &String) -> QueueInfo {
         let config = QueueInfo::new(name.to_string());
         Client::create_queue_with_config(self, name, &config)
+    }
+
+    pub fn queue_list(&mut self, prefix: &str, prev: &str, per_page: u8) -> Vec<QueueInfo> {
+        let path = format!("{}queues?prefix={}&prev={}&per_page={}", self.base_path, prefix, prev, per_page);
+
+        let res = self.http_client.request(Method::Get, path, "".to_string());
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let queues_info: Vec<QueueInfo> = serde_json::from_value(v["queues"].clone()).unwrap();
+
+        queues_info
+    }
+
+    pub fn list_page(&mut self, prev: &str, per_page: u8) -> Vec<QueueInfo> {
+        self.queue_list("", prev, per_page)
+    }
+
+    pub fn filter(&mut self, prefix: &str) -> Vec<QueueInfo> {
+        self.queue_list(prefix, "", PER_PAGE)
+    }
+
+    pub fn list(&mut self) -> Vec<QueueInfo> {
+        self.queue_list("", "", PER_PAGE)
     }
 
     pub fn create_queue_with_config(&mut self, name: &String, config: &QueueInfo) -> QueueInfo {
