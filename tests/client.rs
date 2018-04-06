@@ -22,6 +22,16 @@ mod tests {
     }
 
     #[test]
+    fn get_queue_list() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("list-test");
+        mq.create_queue(&queue_name);
+        let queues: Vec<QueueInfo> = mq.list();
+        
+        assert!(queues.len() > 0);
+    }
+
+    #[test]
     fn create_queue_with_config() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test");
