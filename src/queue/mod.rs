@@ -6,6 +6,9 @@ use serde_json::Value;
 use super::*;
 use message::{Message, ReservationConfig};
 
+const DEFAULT_TIMEOUT: u32 = 60;
+const DEFAULT_COUNT: u8 = 1;
+
 pub struct Queue<'a> {
     pub client: &'a mut Client,
     pub name: String,
@@ -116,9 +119,7 @@ impl<'a> Queue<'a> {
     }
 
     pub fn reserve_message_with_timeout(&mut self, timeout: u32) -> Result<Message, String> {
-        let default_count = 1;
-
-        let mut messages = match self.reserve_messages_with_timeout(default_count, timeout) {
+        let mut messages = match self.reserve_messages_with_timeout(DEFAULT_COUNT, timeout) {
             Ok(messages) => messages,
             Err(e) => return Err(e),
         };
@@ -127,13 +128,25 @@ impl<'a> Queue<'a> {
     }
 
     pub fn reserve_messages(&mut self, count: u8) -> Result<Vec<Message>, String> {
-        let default_timeout = 60;
-        self.reserve_messages_with_timeout(count, default_timeout)
+        self.reserve_messages_with_timeout(count, DEFAULT_TIMEOUT)
     }
 
     pub fn reserve_message(&mut self) -> Result<Message, String> {
-        let default_timeout = 60;
-        self.reserve_message_with_timeout(default_timeout)
+        self.reserve_message_with_timeout(DEFAULT_TIMEOUT)
+    }
+
+    pub fn pop_message(&mut self) -> Result<Message, String> {
+        let mut messages = match self.pop_messages(DEFAULT_COUNT) {
+            Ok(messages) => messages,
+            Err(e) => return Err(e)
+        };
+
+        Ok(messages.pop().unwrap())
+    }
+
+    pub fn pop_messages(&mut self, count: u8) -> Result<Vec<Message>, String> {
+        let delete = true;
+        self.long_poll(count, 0, 0, delete) 
     }
 
     pub fn release_message(&mut self, message: Message, delay: u32) -> String {
@@ -234,8 +247,7 @@ impl<'a> Queue<'a> {
     }
 
     pub fn touch_message(&mut self, message: Message) -> Result<String, String> {
-        let default_timeout = 60;
-        self.touch_message_with_timeout(message, default_timeout)
+        self.touch_message_with_timeout(message, DEFAULT_TIMEOUT)
     }
 
     pub fn peek_messages(&mut self, count: u8) -> Result<Vec<Message>, String> {

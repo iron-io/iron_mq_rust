@@ -275,6 +275,17 @@ mod tests {
     }
 
     #[test]
+    fn pop_message() {
+        let mut mq = Client::from_env();
+        let queue_name = String::from("test-pop");
+        mq.create_queue(&queue_name);
+        let mut q = mq.queue(queue_name.clone());
+        q.push_message(Message::with_body("test pop"));
+        let message = q.pop_message().unwrap();
+        assert!(q.get_message(&message.id.unwrap()).is_err());
+    }
+
+    #[test]
     fn release_message() {
         let mut mq = Client::from_env();
         let queue_name = String::from("test-release");
@@ -300,7 +311,7 @@ mod tests {
         let message = q.reserve_message().unwrap();
         let msg = q.delete_message(message);
         assert!(msg.contains("Deleted"));
-        q.delete();   
+        q.delete();
     }
 
     #[test]
