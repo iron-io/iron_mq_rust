@@ -151,3 +151,13 @@ impl Alert {
         self
     }
 }
+
+#[derive(Deserialize, Debug)]
+pub struct PushStatus {
+    pub subscriber_name: String,
+    pub retries_remaining: u32,
+    pub tries: u32,
+	pub status_code: Option<u32>,     
+	pub url: String,
+    pub msg: Option<String>
+}

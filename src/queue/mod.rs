@@ -308,6 +308,25 @@ impl<'a> Queue<'a> {
         msg
     }
 
+    pub fn get_push_statuses(&mut self, message_id: String) -> Result<Vec<PushStatus>, String> {
+        let path = format!(
+            "{}queues/{}/messages/{}/subscribers",
+            self.client.base_path, self.name, message_id
+        );
+
+        let res = self.client
+            .http_client
+            .request(Method::Get, path, "".to_string());
+
+        let v: Value = serde_json::from_slice(&res).unwrap();
+        let push_statuses: Vec<PushStatus> = match serde_json::from_value(v["subscribers"].clone()) {
+            Ok(push_statuses) => push_statuses,
+            Err(_) => return Err(v["msg"].to_string()),
+        };
+
+        Ok(push_statuses)
+    }
+
 
     pub fn update(&mut self, config: &QueueInfo) -> Result<QueueInfo, String> {
         let path = format!("{}queues/{}", self.client.base_path, self.name)
