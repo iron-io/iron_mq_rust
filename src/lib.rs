@@ -13,7 +13,10 @@ extern crate serde;
 
 use hyper::{ Method };
 use serde_json::{Value};
-use std::env;
+use std::{
+    env,
+    fs::File
+};
 
 use queue::*;
 use queue::queue_info::*;
@@ -35,6 +38,13 @@ impl Client {
             base_path,
             http_client,
         }
+    }
+
+    pub fn from_file() -> Client {
+        let reader = File::open("iron.json").expect("iron.json not found");
+        let config: Config = serde_json::from_reader(reader).expect("Json parsing error");
+        
+        Client::new(config.host, config.project_id, config.token)
     }
 
     pub fn from_env() -> Client {
@@ -106,4 +116,11 @@ fn get_from_env(variable: &str) -> String {
         .expect(&error_message);
 
     var
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Config {
+    project_id: String,
+    token: String,
+    host: String,
 }
