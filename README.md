@@ -4,7 +4,7 @@ IronMQ Rust Client
 Getting Started
 ===============
 
-You can start using IronMQ client by first adding it to your Cargo.toml:
+You can start using IronMQ client by adding it to your Cargo.toml:
 
 ```
 [dependencies]
@@ -14,7 +14,7 @@ iron_mq_rust = {path = "../iron_mq_rust"}
 Client configuration
 ----------------
 #### Using iron.json file
-Get iron.json file from [iron.io](https://www.iron.io/) and put it to the root of your project.
+Get iron.json file from [iron.io](https://www.iron.io/) and place it to the root of your project.
 ```
 {
 	"project_id":"project id",
@@ -34,7 +34,7 @@ fn main() {
 }
 ```
 
-#### In code configuration
+#### Code configuration
 You can also configure your client in code:
 ```
 extern crate iron_mq_rust;
@@ -83,7 +83,7 @@ fn main() {
     println!("{}", id.unwrap());
 }
 ```
-**Note:** if you want push message to existing queue - you can skip this step: ```client.create_queue(&queue_name);```
+**Note:** if you want to push message into existing queue, skip step of queue creation: ```client.create_queue(&queue_name);```
 
 ## Further Links
 
