@@ -1,7 +1,11 @@
 [package]
 name = "iron_mq_rust"
 version = "0.1.0"
-authors = ["Maksym Shekhovets <maximsh@interlink-ua.com>"]
+authors = [
+    "Maksym Shekhovets <maximsh@interlink-ua.com>",
+    "Oleksii Lystopadov <oleksiily@softwareplanetgroup.com>"
+]
+description = "Rust library for IronMQ."
 
 [dependencies]
 futures = "0.1"
