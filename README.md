@@ -4,7 +4,7 @@ IronMQ Rust Client
 Getting Started
 ===============
 
-You can start using IronMQ client by adding it to your Cargo.toml:
+You can start using the IronMQ client by adding it to your Cargo.toml:
 
 ```
 [dependencies]
@@ -13,8 +13,8 @@ iron_mq_rust = {path = "../iron_mq_rust"}
 
 Client configuration
 ----------------
-#### Using iron.json file
-Get iron.json file from [iron.io](https://www.iron.io/) and place it to the root of your project.
+#### Using your iron.json file
+Get your iron.json file from [iron.io](https://www.iron.io/) and place it in the root of your project.
 ```
 {
 	"project_id":"project id",
@@ -22,7 +22,7 @@ Get iron.json file from [iron.io](https://www.iron.io/) and place it to the root
     "host":"mq-aws-eu-west-1-1.iron.io"
 }
 ```
-Then initialize client ```from_file()``` function:
+Then initialize the client ```from_file()``` function:
 
 ```
 extern crate iron_mq_rust;
@@ -35,7 +35,7 @@ fn main() {
 ```
 
 #### Code configuration
-You can also configure your client in code:
+You can also configure the client in your code:
 ```
 extern crate iron_mq_rust;
 
@@ -50,7 +50,7 @@ fn main() {
 ```
 
 #### Using environment variables
-In this case you initialize client using ```from_env()``` function:
+In this case you can initialize the client using ```from_env()``` function:
 ```
 extern crate iron_mq_rust;
 
@@ -60,13 +60,13 @@ fn main() {
     let mut client = Client::from_env();
 }
 ```
-Then you can run your program using environment variables:
+Then, you can run your program using environment variables:
 ```
 IRON_HOST=mq-aws-eu-west-1-1.iron.io IRON_PROJECT_ID=project_id IRON_TOKEN=token cargo run
 ```
 Example
 -------------------
-Simplest message pushing example:
+Simple message pushing example:
 ```
 extern crate iron_mq_rust;
 
@@ -83,7 +83,7 @@ fn main() {
     println!("{}", id.unwrap());
 }
 ```
-**Note:** if you want to push message into existing queue, skip step of queue creation: ```client.create_queue(&queue_name);```
+**Note:** if you want to push message into an existing queue, skip step of queue creation: ```client.create_queue(&queue_name);```
 
 ## Further Links
 
