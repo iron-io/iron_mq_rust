@@ -1,6 +1,3 @@
-IronMQ Rust Client
-----------------
-
 Getting Started
 ===============
 
