@@ -14,7 +14,7 @@ Client configuration
 Get your iron.json file from [iron.io](https://www.iron.io/) and place it in the root of your project.
 ```
 {
-	"project_id":"project id",
+    "project_id":"project id",
     "token":"token",
     "host":"mq-aws-eu-west-1-1.iron.io"
 }
