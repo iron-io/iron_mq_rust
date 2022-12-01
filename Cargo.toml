@@ -9,7 +9,7 @@ description = "Rust library for IronMQ."
 
 [dependencies]
 futures = "0.1"
-hyper = "0.11"
+hyper = "0.12.34"
 tokio-core = "0.1"
 hyper-tls = "0.1"
 num_cpus = "1.8"
